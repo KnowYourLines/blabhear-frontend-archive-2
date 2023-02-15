@@ -118,10 +118,16 @@ export default {
           responseType: "blob",
         })
         .then((response) => {
-          const outputFile = response.data
+          const outputFile = new File([response.data], "result.mp3", { type: 'audio/mp3' });
           const outputFileUrl = URL.createObjectURL(outputFile);
           const audio = new Audio(outputFileUrl);
           audio.play();
+          const shareData = {
+            files: [outputFile],
+          };
+          console.log(navigator.canShare(shareData));
+          console.log(typeof navigator.share === "function")
+          navigator.share(shareData);
         })
         .catch(function (error) {
           console.log(error);
