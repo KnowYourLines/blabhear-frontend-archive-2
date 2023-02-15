@@ -109,16 +109,20 @@ export default {
     },
     approveRecorded: function () {
       const formData = new FormData();
-      formData.append("file_uploaded", this.recordingFile);
+      formData.append("audio", this.recordingFile);
+      formData.append("transcript", "hello world");
       axios
-        .post(process.env.VUE_APP_BACKEND_URL + "/upload/", formData, {
+        .post(process.env.VUE_APP_BACKEND_URL + "/vidnote/", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
           responseType: "blob",
         })
         .then((response) => {
-          const outputFile = new File([response.data], "result.mp3", { type: 'audio/mp3' });
+          console.log(response);
+          const outputFile = new File([response.data], "result.mp3", {
+            type: "audio/mp3",
+          });
           const outputFileUrl = URL.createObjectURL(outputFile);
           const audio = new Audio(outputFileUrl);
           audio.play();
@@ -126,7 +130,7 @@ export default {
             files: [outputFile],
           };
           console.log(navigator.canShare(shareData));
-          console.log(typeof navigator.share === "function")
+          console.log(typeof navigator.share === "function");
           navigator.share(shareData);
         })
         .catch(function (error) {
