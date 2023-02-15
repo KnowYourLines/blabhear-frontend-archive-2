@@ -41,6 +41,7 @@
   </div>
 </template>
 <script>
+import axios from "axios";
 export default {
   name: "VoiceRecorder",
   data() {
@@ -107,7 +108,24 @@ export default {
       this.recordingData = [];
     },
     approveRecorded: function () {
-      console.log('ajax call to backend api')
+      const formData = new FormData();
+      formData.append("file_uploaded", this.recordingFile);
+      axios
+        .post(process.env.VUE_APP_BACKEND_URL + "/upload/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "blob",
+        })
+        .then((response) => {
+          const outputFile = response.data
+          const outputFileUrl = URL.createObjectURL(outputFile);
+          const audio = new Audio(outputFileUrl);
+          audio.play();
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 };
