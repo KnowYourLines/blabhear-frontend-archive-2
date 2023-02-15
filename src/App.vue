@@ -1,15 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="column">
+    <VoiceRecorder />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import VoiceRecorder from './components/VoiceRecorder.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    VoiceRecorder
   }
 }
 </script>
@@ -22,5 +23,17 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+@media (orientation: landscape) {
+  .column {
+    display: inline-block;
+    width: 100%;
+  }
+}
+@media (orientation: portrait) {
+  .column {
+    display: inline-block;
+    width: 100%;
+  }
 }
 </style>
