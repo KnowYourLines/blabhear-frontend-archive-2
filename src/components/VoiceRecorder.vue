@@ -120,8 +120,8 @@ export default {
         })
         .then((response) => {
           console.log(response);
-          const outputFile = new File([response.data], "result.mp3", {
-            type: "audio/mp3",
+          const outputFile = new File([response.data], "result.mp4", {
+            type: "video/mp4",
           });
           const outputFileUrl = URL.createObjectURL(outputFile);
           const audio = new Audio(outputFileUrl);
