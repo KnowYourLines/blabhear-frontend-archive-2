@@ -9,11 +9,6 @@
     </div>
     <div class="playback" v-else>
       <img
-        src="@/assets/icons8-checkmark-50.png"
-        @click="approveRecorded"
-        class="approve-recorded"
-      />
-      <img
         src="@/assets/icons8-microphone-60.png"
         @click="recordAudio"
         class="record-button"
@@ -45,10 +40,10 @@
       <textarea
         class="transcript"
         v-model.trim="transcript"
-        placeholder="Transcript"
+        placeholder="Voice transcript"
         readonly
       /><br /><img
-        src="@/assets/icons8-edit-24.png"
+        src="@/assets/icons8-edit-48.png"
         @click="edit"
         class="edit-button"
       />
@@ -57,7 +52,7 @@
       <textarea
         class="transcript"
         v-model.trim="editableTranscript"
-        placeholder="Transcript"
+        placeholder="Voice transcript"
         ref="editTranscript"
       />
       <br /><img
@@ -69,6 +64,9 @@
         @click="cancelEdit"
         class="edit-button"
       />
+    </div>
+    <div class="vidnote">
+      <video :src="vidNoteFileUrl" controls></video>
     </div>
   </div>
 </template>
@@ -87,6 +85,7 @@ export default {
       transcript: null,
       editableTranscript: null,
       editTranscript: false,
+      vidNoteFileUrl: null,
     };
   },
   methods: {
@@ -178,6 +177,28 @@ export default {
           console.log(error);
         });
     },
+    makeVidNote: function (audioFile, transcript) {
+      const formData = new FormData();
+      formData.append("audio", audioFile);
+      formData.append("transcript", transcript);
+      axios
+        .post(process.env.VUE_APP_BACKEND_URL + "/vidnote/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "blob",
+        })
+        .then((response) => {
+          console.log(response);
+          const outputFile = new File([response.data], "result.mp4", {
+            type: "video/mp4",
+          });
+          this.vidNoteFileUrl = URL.createObjectURL(outputFile);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
     transcribe: function () {
       const formData = new FormData();
       formData.append("audio", this.recordingFile);
@@ -191,6 +212,7 @@ export default {
         .then((response) => {
           console.log(response);
           this.transcript = response.data.transcript;
+          this.makeVidNote(this.recordingFile, this.transcript);
         })
         .catch(function (error) {
           console.log(error);
@@ -210,6 +232,7 @@ export default {
     updateTranscript: function () {
       this.editTranscript = false;
       this.transcript = this.editableTranscript;
+      this.makeVidNote(this.recordingFile, this.transcript);
     },
   },
 };
@@ -273,8 +296,16 @@ export default {
   background: #e0e0e0;
 }
 .transcript {
-  width: 30%;
+  width: 50%;
   resize: none;
   height: 120px;
+}
+.vidnote {
+  transform: scale(0.9);
+  display: flex;
+  justify-content: center;
+}
+textarea {
+  font-size: 18px;
 }
 </style>
