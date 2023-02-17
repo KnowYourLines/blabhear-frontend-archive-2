@@ -75,6 +75,15 @@
     <div class="vidnote">
       <video :src="vidNoteFileUrl" controls></video>
     </div>
+    <div>
+      Voice effect:
+      <select v-model="chosenVoiceEffect" @change="changeVoiceEffect">
+        <option v-for="effect in voiceEffects" :key="effect">
+          {{ effect }}
+        </option>
+      </select>
+    </div>
+    <br />
     <div v-if="shareable">
       <img
         src="@/assets/icons8-send-48.png"
@@ -104,6 +113,17 @@ export default {
       vidNoteFile: null,
       shareFiles: null,
       shareable: false,
+      chosenVoiceEffect: "",
+      voiceEffects: [
+        "",
+        "High Pitch",
+        "Low Pitch",
+        "Wobble",
+        "Echo",
+        "Fuzzy",
+        "Hyper",
+        "Sleepy",
+      ],
     };
   },
   watch: {
@@ -117,6 +137,13 @@ export default {
     },
   },
   methods: {
+    changeVoiceEffect: function () {
+      this.makeVidNote(
+        this.recordingFile,
+        this.transcript,
+        this.chosenVoiceEffect
+      );
+    },
     send: function () {
       navigator.share(this.shareFiles);
     },
@@ -173,11 +200,13 @@ export default {
       this.recordingFile = null;
       this.recordingData = [];
       this.transcript = null;
+      this.chosenVoiceEffect = "";
     },
-    makeVidNote: function (audioFile, transcript) {
+    makeVidNote: function (audioFile, transcript, effect) {
       const formData = new FormData();
       formData.append("audio", audioFile);
       formData.append("transcript", transcript);
+      formData.append("effect", effect);
       axios
         .post(process.env.VUE_APP_BACKEND_URL + "/vidnote/", formData, {
           headers: {
@@ -207,7 +236,11 @@ export default {
         })
         .then((response) => {
           this.transcript = response.data.transcript;
-          this.makeVidNote(this.recordingFile, this.transcript);
+          this.makeVidNote(
+            this.recordingFile,
+            this.transcript,
+            this.chosenVoiceEffect
+          );
         })
         .catch(function (error) {
           console.log(error);
@@ -227,7 +260,11 @@ export default {
     updateTranscript: function () {
       this.editTranscript = false;
       this.transcript = this.editableTranscript;
-      this.makeVidNote(this.recordingFile, this.transcript);
+      this.makeVidNote(
+        this.recordingFile,
+        this.transcript,
+        this.chosenVoiceEffect
+      );
     },
   },
 };
@@ -298,18 +335,18 @@ export default {
   background: #e0e0e0;
 }
 @media (orientation: portrait) {
-.transcript {
-  width: 100%;
-  resize: none;
-  height: 120px;
-}
+  .transcript {
+    width: 100%;
+    resize: none;
+    height: 120px;
+  }
 }
 @media (orientation: landscape) {
-.transcript {
-  width: 25%;
-  resize: none;
-  height: 120px;
-}
+  .transcript {
+    width: 25%;
+    resize: none;
+    height: 120px;
+  }
 }
 .vidnote {
   transform: scale(0.9);
