@@ -39,6 +39,38 @@
       />
     </div>
   </div>
+  <br />
+  <div v-if="recordingData.length != 0 && !isRecording && transcript !== null">
+    <div v-if="!editTranscript">
+      <textarea
+        class="transcript"
+        v-model.trim="transcript"
+        placeholder="Transcript"
+        readonly
+      /><br /><img
+        src="@/assets/icons8-edit-24.png"
+        @click="edit"
+        class="edit-button"
+      />
+    </div>
+    <div v-else>
+      <textarea
+        class="transcript"
+        v-model.trim="editableTranscript"
+        placeholder="Transcript"
+        ref="editTranscript"
+      />
+      <br /><img
+        src="@/assets/icons8-checkmark-48.png"
+        @click="updateTranscript"
+        class="edit-button"
+      /><img
+        src="@/assets/icons8-cancel-48.png"
+        @click="cancelEdit"
+        class="edit-button"
+      />
+    </div>
+  </div>
 </template>
 <script>
 import axios from "axios";
@@ -50,8 +82,11 @@ export default {
       isRecording: false,
       recorder: null,
       recordingData: [],
-      recordedAudioUrl: "",
+      recordedAudioUrl: null,
       recordingFile: null,
+      transcript: null,
+      editableTranscript: null,
+      editTranscript: false,
     };
   },
   methods: {
@@ -65,6 +100,7 @@ export default {
           window.URL.revokeObjectURL(this.recordedAudioUrl);
         }
         this.recordedAudioUrl = window.URL.createObjectURL(this.recordingFile);
+        this.transcribe();
       }
     },
     addRecording: function () {
@@ -106,6 +142,7 @@ export default {
       this.recorder.stop();
       this.recordingFile = null;
       this.recordingData = [];
+      this.transcript = null;
     },
     approveRecorded: function () {
       const formData = new FormData();
@@ -132,10 +169,47 @@ export default {
           console.log(navigator.canShare(shareData));
           console.log(typeof navigator.share === "function");
           navigator.share(shareData);
+          const link = document.createElement("a");
+          link.href = outputFileUrl;
+          link.download = "result";
+          link.click();
         })
         .catch(function (error) {
           console.log(error);
         });
+    },
+    transcribe: function () {
+      const formData = new FormData();
+      formData.append("audio", this.recordingFile);
+      axios
+        .post(process.env.VUE_APP_BACKEND_URL + "/transcribe/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "json",
+        })
+        .then((response) => {
+          console.log(response);
+          this.transcript = response.data.transcript;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    edit: function () {
+      this.editTranscript = true;
+      this.editableTranscript = this.transcript;
+      this.$nextTick(() => {
+        this.$refs.editTranscript.select();
+      });
+    },
+    cancelEdit: function () {
+      this.editTranscript = false;
+      this.editableTranscript = this.transcript;
+    },
+    updateTranscript: function () {
+      this.editTranscript = false;
+      this.transcript = this.editableTranscript;
     },
   },
 };
@@ -189,5 +263,18 @@ export default {
   transform: scale(0.9);
   display: flex;
   justify-content: center;
+}
+.edit-button {
+  padding: 6px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.edit-button:hover {
+  background: #e0e0e0;
+}
+.transcript {
+  width: 30%;
+  resize: none;
+  height: 120px;
 }
 </style>
