@@ -46,7 +46,20 @@
         v-model.trim="transcript"
         placeholder="Voice transcript"
         readonly
-      /><br /><img
+      />
+      <div>
+        Language:
+        <select v-model="chosenLanguage" @change="changeLanguage">
+          <option
+            v-for="language in languages"
+            :key="language"
+            :value="language.value"
+          >
+            {{ language.display_name }}
+          </option>
+        </select>
+      </div>
+      <br /><img
         src="@/assets/icons8-edit-48.png"
         @click="edit"
         @contextmenu.prevent
@@ -119,6 +132,8 @@ export default {
       shareable: false,
       chosenVoiceEffect: "",
       voiceEffects: [{ value: "", display_name: "" }],
+      chosenLanguage: "en",
+      languages: [],
     };
   },
   watch: {
@@ -132,6 +147,9 @@ export default {
     },
   },
   methods: {
+    changeLanguage: function () {
+      this.transcribe();
+    },
     changeVoiceEffect: function () {
       this.makeVidNote(
         this.recordingFile,
@@ -222,6 +240,7 @@ export default {
     transcribe: function () {
       const formData = new FormData();
       formData.append("audio", this.recordingFile);
+      formData.append("language", this.chosenLanguage);
       axios
         .post(process.env.VUE_APP_BACKEND_URL + "/transcribe/", formData, {
           headers: {
@@ -269,6 +288,16 @@ export default {
       })
       .then((response) => {
         this.voiceEffects.push(...response.data.actions.POST.effect.choices);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    axios
+      .options(process.env.VUE_APP_BACKEND_URL + "/transcribe/", {
+        responseType: "json",
+      })
+      .then((response) => {
+        this.languages.push(...response.data.actions.POST.language.choices);
       })
       .catch(function (error) {
         console.log(error);
