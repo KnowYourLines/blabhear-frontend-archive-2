@@ -297,10 +297,19 @@ export default {
 .edit-button:hover {
   background: #e0e0e0;
 }
+@media (orientation: portrait) {
 .transcript {
-  width: 50%;
+  width: 100%;
   resize: none;
   height: 120px;
+}
+}
+@media (orientation: landscape) {
+.transcript {
+  width: 25%;
+  resize: none;
+  height: 120px;
+}
 }
 .vidnote {
   transform: scale(0.9);
