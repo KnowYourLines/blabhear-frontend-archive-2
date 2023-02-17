@@ -231,6 +231,9 @@ export default {
           this.vidNoteFile = new File([response.data], "result.mp4", {
             type: "video/mp4",
           });
+          if (this.vidNoteFileUrl) {
+            URL.revokeObjectURL(this.vidNoteFileUrl);
+          }
           this.vidNoteFileUrl = URL.createObjectURL(this.vidNoteFile);
         })
         .catch(function (error) {
