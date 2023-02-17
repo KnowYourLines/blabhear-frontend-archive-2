@@ -78,8 +78,12 @@
     <div>
       Voice effect:
       <select v-model="chosenVoiceEffect" @change="changeVoiceEffect">
-        <option v-for="effect in voiceEffects" :key="effect">
-          {{ effect }}
+        <option
+          v-for="effect in voiceEffects"
+          :key="effect"
+          :value="effect.value"
+        >
+          {{ effect.display_name }}
         </option>
       </select>
     </div>
@@ -114,16 +118,7 @@ export default {
       shareFiles: null,
       shareable: false,
       chosenVoiceEffect: "",
-      voiceEffects: [
-        "",
-        "High Pitch",
-        "Low Pitch",
-        "Wobble",
-        "Echo",
-        "Fuzzy",
-        "Hyper",
-        "Sleepy",
-      ],
+      voiceEffects: [{ value: "", display_name: "" }],
     };
   },
   watch: {
@@ -266,6 +261,18 @@ export default {
         this.chosenVoiceEffect
       );
     },
+  },
+  created() {
+    axios
+      .options(process.env.VUE_APP_BACKEND_URL + "/vidnote/", {
+        responseType: "json",
+      })
+      .then((response) => {
+        this.voiceEffects.push(...response.data.actions.POST.effect.choices);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   },
 };
 </script>
