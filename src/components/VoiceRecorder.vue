@@ -4,6 +4,7 @@
       <img
         src="@/assets/icons8-microphone-60.png"
         @click="addRecording"
+        @contextmenu.prevent
         class="add-record"
       />
     </div>
@@ -11,6 +12,7 @@
       <img
         src="@/assets/icons8-microphone-60.png"
         @click="recordAudio"
+        @contextmenu.prevent
         class="record-button"
       />
       <audio
@@ -21,6 +23,7 @@
       <img
         src="@/assets/icons8-bin-48.png"
         @click="deleteRecorded"
+        @contextmenu.prevent
         class="bin-button"
       />
     </div>
@@ -30,6 +33,7 @@
       <img
         src="@/assets/icons8-pause-squared-48.png"
         @click="pauseRecording"
+        @contextmenu.prevent
         class="pause-button"
       />
     </div>
@@ -45,6 +49,7 @@
       /><br /><img
         src="@/assets/icons8-edit-48.png"
         @click="edit"
+        @contextmenu.prevent
         class="edit-button"
       />
     </div>
@@ -58,15 +63,25 @@
       <br /><img
         src="@/assets/icons8-checkmark-48.png"
         @click="updateTranscript"
+        @contextmenu.prevent
         class="edit-button"
       /><img
         src="@/assets/icons8-cancel-48.png"
         @click="cancelEdit"
+        @contextmenu.prevent
         class="edit-button"
       />
     </div>
     <div class="vidnote">
       <video :src="vidNoteFileUrl" controls></video>
+    </div>
+    <div v-if="shareable">
+      <img
+        src="@/assets/icons8-send-48.png"
+        @click="send"
+        @contextmenu.prevent
+        class="send-button"
+      />
     </div>
   </div>
 </template>
@@ -86,9 +101,25 @@ export default {
       editableTranscript: null,
       editTranscript: false,
       vidNoteFileUrl: null,
+      vidNoteFile: null,
+      shareFiles: null,
+      shareable: false,
     };
   },
+  watch: {
+    vidNoteFileUrl() {
+      this.shareFiles = {
+        files: [this.vidNoteFile],
+      };
+      this.shareable =
+        typeof navigator.share === "function" &&
+        navigator.canShare(this.shareFiles);
+    },
+  },
   methods: {
+    send: function () {
+      navigator.share(this.shareFiles);
+    },
     pauseRecording: function () {
       if (this.recorder) {
         this.recorder.pause();
@@ -143,40 +174,6 @@ export default {
       this.recordingData = [];
       this.transcript = null;
     },
-    approveRecorded: function () {
-      const formData = new FormData();
-      formData.append("audio", this.recordingFile);
-      formData.append("transcript", "hello world");
-      axios
-        .post(process.env.VUE_APP_BACKEND_URL + "/vidnote/", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          responseType: "blob",
-        })
-        .then((response) => {
-          console.log(response);
-          const outputFile = new File([response.data], "result.mp4", {
-            type: "video/mp4",
-          });
-          const outputFileUrl = URL.createObjectURL(outputFile);
-          const audio = new Audio(outputFileUrl);
-          audio.play();
-          const shareData = {
-            files: [outputFile],
-          };
-          console.log(navigator.canShare(shareData));
-          console.log(typeof navigator.share === "function");
-          navigator.share(shareData);
-          const link = document.createElement("a");
-          link.href = outputFileUrl;
-          link.download = "result";
-          link.click();
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
     makeVidNote: function (audioFile, transcript) {
       const formData = new FormData();
       formData.append("audio", audioFile);
@@ -189,11 +186,10 @@ export default {
           responseType: "blob",
         })
         .then((response) => {
-          console.log(response);
-          const outputFile = new File([response.data], "result.mp4", {
+          this.vidNoteFile = new File([response.data], "result.mp4", {
             type: "video/mp4",
           });
-          this.vidNoteFileUrl = URL.createObjectURL(outputFile);
+          this.vidNoteFileUrl = URL.createObjectURL(this.vidNoteFile);
         })
         .catch(function (error) {
           console.log(error);
@@ -210,7 +206,6 @@ export default {
           responseType: "json",
         })
         .then((response) => {
-          console.log(response);
           this.transcript = response.data.transcript;
           this.makeVidNote(this.recordingFile, this.transcript);
         })
@@ -255,6 +250,13 @@ export default {
   transition: 0.2s;
 }
 .record-button:hover {
+  transform: scale(1.1);
+}
+.send-button {
+  cursor: pointer;
+  transition: 0.2s;
+}
+.send-button:hover {
   transform: scale(1.1);
 }
 .pause-button {
