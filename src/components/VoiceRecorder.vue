@@ -213,8 +213,13 @@ export default {
       this.recordingData = [];
       this.transcript = null;
       this.chosenVoiceEffect = "";
+      this.vidNoteFileUrl = null;
     },
     makeVidNote: function (audioFile, transcript, effect) {
+      if (this.vidNoteFileUrl) {
+        URL.revokeObjectURL(this.vidNoteFileUrl);
+        this.vidNoteFileUrl = null;
+      }
       const formData = new FormData();
       formData.append("audio", audioFile);
       formData.append("transcript", transcript);
@@ -230,9 +235,6 @@ export default {
           this.vidNoteFile = new File([response.data], "result.mp4", {
             type: "video/mp4",
           });
-          if (this.vidNoteFileUrl) {
-            URL.revokeObjectURL(this.vidNoteFileUrl);
-          }
           this.vidNoteFileUrl = URL.createObjectURL(this.vidNoteFile);
         })
         .catch(function (error) {
