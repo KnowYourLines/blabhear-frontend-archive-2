@@ -387,10 +387,19 @@ export default {
     height: 120px;
   }
 }
-.vidnote {
-  transform: scale(0.5);
-  display: flex;
-  justify-content: center;
+@media (orientation: landscape) {
+  video {
+    width: 25%;
+    display: block;
+    margin: 0 auto;
+  }
+}
+@media (orientation: portrait) {
+  video {
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
 }
 textarea {
   font-size: 18px;
