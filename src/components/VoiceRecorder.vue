@@ -388,7 +388,7 @@ export default {
   }
 }
 .vidnote {
-  transform: scale(0.7);
+  transform: scale(0.5);
   display: flex;
   justify-content: center;
 }
