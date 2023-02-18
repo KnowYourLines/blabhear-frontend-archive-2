@@ -47,8 +47,15 @@
         placeholder="Voice transcript"
         readonly
       />
-      <div>
-        Language:
+      <br />
+      <div class="inline">
+        <img
+          src="@/assets/icons8-edit-48.png"
+          @click="edit"
+          @contextmenu.prevent
+          class="edit-button"
+        />
+        <label>Language: </label>
         <select v-model="chosenLanguage" @change="changeLanguage">
           <option
             v-for="language in languages"
@@ -59,12 +66,6 @@
           </option>
         </select>
       </div>
-      <br /><img
-        src="@/assets/icons8-edit-48.png"
-        @click="edit"
-        @contextmenu.prevent
-        class="edit-button"
-      />
     </div>
     <div v-else>
       <textarea
@@ -88,8 +89,15 @@
     <div class="vidnote">
       <video :src="vidNoteFileUrl" controls></video>
     </div>
-    <div>
-      Voice effect:
+    <div class="inline">
+      <img
+        v-if="shareable"
+        src="@/assets/icons8-send-48.png"
+        @click="send"
+        @contextmenu.prevent
+        class="send-button"
+      />
+      <label>Voice effect: </label>
       <select v-model="chosenVoiceEffect" @change="changeVoiceEffect">
         <option
           v-for="effect in voiceEffects"
@@ -99,15 +107,6 @@
           {{ effect.display_name }}
         </option>
       </select>
-    </div>
-    <br />
-    <div v-if="shareable">
-      <img
-        src="@/assets/icons8-send-48.png"
-        @click="send"
-        @contextmenu.prevent
-        class="send-button"
-      />
     </div>
   </div>
 </template>
@@ -309,6 +308,15 @@ export default {
 };
 </script>
 <style scoped>
+.inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+label {
+  margin: 0;
+}
 .add-record {
   padding: 6px 10px;
   cursor: pointer;
@@ -329,11 +337,12 @@ export default {
   transform: scale(1.1);
 }
 .send-button {
+  padding: 6px 10px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: 0.2s;
 }
 .send-button:hover {
-  transform: scale(1.1);
+  background: #e0e0e0;
 }
 .pause-button {
   cursor: pointer;
@@ -379,6 +388,11 @@ export default {
     resize: none;
     height: 120px;
   }
+  video {
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
 }
 @media (orientation: landscape) {
   .transcript {
@@ -386,21 +400,13 @@ export default {
     resize: none;
     height: 120px;
   }
-}
-@media (orientation: landscape) {
   video {
     width: 25%;
     display: block;
     margin: 0 auto;
   }
 }
-@media (orientation: portrait) {
-  video {
-    width: 100%;
-    display: block;
-    margin: 0 auto;
-  }
-}
+
 textarea {
   font-size: 18px;
 }
