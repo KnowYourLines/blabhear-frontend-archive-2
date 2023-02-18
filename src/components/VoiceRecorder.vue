@@ -316,6 +316,7 @@ export default {
 
 label {
   margin: 0;
+  padding: 6px 10px;
 }
 .add-record {
   padding: 6px 10px;
